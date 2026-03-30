@@ -1,0 +1,43 @@
+Problem Statement: The Automated L1 DevOps/Support Triage Agent
+The Problem: Engineering and customer success teams waste countless hours triaging vague bug reports and support tickets. 
+When a ticket arrives, a human engineer must manually read it, check the user's account status or environment via an API, 
+search internal documentation for known issues, and search the web for external error codes. 
+This manual context-gathering creates a massive bottleneck and delays time-to-resolution.
+
+The Solution: An AI Agent built with a ReAct (Reasoning and Acting) workflow that automatically handles Level 1 triage. 
+The agent will ingest a new ticket, autonomously use external tools (mock APIs) to gather user context, 
+query an internal RAG pipeline (Vector DB) for known runbooks, and fall back to web search if needed. 
+Finally, it will synthesize this data into a structured root-cause assessment and draft a response for human approval.
+
+
+The 3-Day Build Plan
+Day 1: The RAG Engine & Data Setup
+Goal: Build the internal knowledge base and set up the development environment.
+
+Step 1: Initialize the Python environment (venv, dotenv) and install core libraries: langchain, langchain-openai (or langchain-google-genai), chromadb (or faiss-cpu), and pypdf/markdown.
+
+Step 2: Create the mock dataset. Write 3-4 Markdown (.md) files representing internal company runbooks and create a tickets.json file with 5 fake support tickets.
+
+Step 3: Build the RAG pipeline. Load the Markdown files, split them into chunks, generate embeddings, and store them in the Vector DB.
+
+Step 4: Wrap the Vector DB retriever in a LangChain @tool decorator so the agent can access it.
+
+Day 2: Tool Forging & Agent Assembly
+Goal: Equip the agent with external tools and wire up the reasoning engine.
+
+Step 1: Build the get_ticket_details tool. Write a Python function that reads tickets.json to return user tier and environment based on a ticket ID, wrapping it as a @tool.
+
+Step 2: Add a web search tool using the Tavily API (or DuckDuckGo API) for external knowledge retrieval.
+
+Step 3: Initialize the Agent. Use LangChain's create_tool_calling_agent and AgentExecutor to bind the LLM with your three tools (RAG, Mock API, Web Search).
+
+Step 4: Run a terminal test. Pass a fake ticket to the agent and verify its "Thought -> Action -> Observation" loop in the console.
+
+Day 3: Prompts, Polish, and UI
+Goal: Refine the agent's behavior and build a frontend to showcase the project.
+
+Step 1: Engineer the System Prompt. Give the agent strict instructions on formatting the final output and mandate which tools to prioritize.
+
+Step 2: Debug edge cases. Fix any infinite loops or instances where the agent hallucinates instead of using a tool.
+
+Step 3: Build a Streamlit frontend. Create a sidebar to select a ticket and a main panel that streams the agent's thought process and displays the final drafted response.

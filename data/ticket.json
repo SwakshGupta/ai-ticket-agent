@@ -1,0 +1,32 @@
+[
+  {
+    "ticket_id": "T1",
+    "issue": "User unable to login, getting 'Invalid token' error",
+    "user_tier": "premium",
+    "environment": "production"
+  },
+  {
+    "ticket_id": "T2",
+    "issue": "Database connection timeout error",
+    "user_tier": "free",
+    "environment": "staging"
+  },
+  {
+    "ticket_id": "T3",
+    "issue": "App crashes on startup after deployment",
+    "user_tier": "enterprise",
+    "environment": "production"
+  },
+  {
+    "ticket_id": "T4",
+    "issue": "Payment API returning 500 error",
+    "user_tier": "premium",
+    "environment": "production"
+  },
+  {
+    "ticket_id": "T5",
+    "issue": "Slow response time on dashboard",
+    "user_tier": "free",
+    "environment": "production"
+  }
+]

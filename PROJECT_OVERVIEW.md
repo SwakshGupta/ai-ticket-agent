@@ -1,281 +1,392 @@
-# 🧠 AI Ticket Triage Agent — Project Understanding
+# 🧠 AI Ticket Triage Agent — Complete Project Understanding
 
-## 📌 Overall Idea
+---
 
-This project is an **AI-based ticket resolution system**.
+# 📌 Overall Idea
 
-It takes a user query (like a support ticket), understands it, and then:
+This project is a **production-style AI ticket resolution agent**.
 
-* decides what to do
-* uses tools (RAG, ticket lookup, web search)
-* returns a helpful response
+It takes a user query (support ticket), understands it using an LLM, and then:
+
+* decides what action to take (intelligent planning)
+* uses tools (RAG, ticket system, web search)
+* applies fallback strategies if needed
+* returns a response with confidence level
+* logs the entire reasoning process
+* remembers past interactions
 
 👉 Flow:
-User → Agent → Decision → Tool → Response
+User → Memory → Agent → Decision → Tool → Fallback → Response + Confidence
 
 ---
 
-# 🏗️ High-Level Flow
+# 🏗️ High-Level Flow (UPDATED)
 
 1. User enters a query
-2. Agent receives the query
-3. Planner decides what action to take
-4. Executor runs the correct tool
-5. Tool returns result
-6. Agent gives final response
+2. Previous conversation is added (memory)
+3. LLM planner decides what action to take
+4. Agent follows ReAct reasoning (thought → action → observation)
+5. Executor runs the selected tool
+6. If tool fails → fallback mechanism triggers
+7. Response is generated with hallucination control
+8. Confidence score is added
+9. Logs are printed (trace)
+10. Memory is updated
 
 ---
 
-# 📁 Folder-by-Folder Explanation
+# 🔥 NEW SYSTEM CAPABILITIES (IMPORTANT)
+
+## ✅ Intelligent Planning
+
+* Uses LLM instead of hardcoded rules
+* Understands intent dynamically
+
+## ✅ ReAct Reasoning
+
+* Thought → Action → Observation flow
+* Makes system explainable
+
+## ✅ Hybrid RAG Retrieval
+
+* Combines vector search + keyword search
+* Improves retrieval accuracy
+
+## ✅ Hallucination Control
+
+* Forces LLM to answer only from context
+* Returns fallback if no valid answer
+
+## ✅ Fallback Mechanism
+
+* If RAG fails → uses web search
+* Prevents empty or wrong responses
+
+## ✅ Confidence Scoring
+
+* Outputs: High / Medium / Low confidence
+* Based on response quality
+
+## ✅ Memory Integration
+
+* Uses last 3 conversations
+* Helps with follow-up queries
+
+## ✅ Logging & Tracing
+
+* Tracks:
+
+  * Query
+  * Action
+  * Result
+* Helps debugging + interviews
+
+## ✅ Error Handling
+
+* Handles:
+
+  * tool failures
+  * invalid actions
+  * runtime errors
+
+## ✅ Evaluation Pipeline
+
+* Measures system accuracy
+* Identifies failure cases
+
+## ✅ Ticket Lifecycle Management
+
+* Supports:
+
+  * open
+  * resolved
+  * escalated
+
+## ✅ UI Support (Streamlit)
+
+* Interactive interface for demo
+
+---
+
+# 📁 Folder-by-Folder Explanation (UPDATED)
 
 ---
 
 ## 🔹 `app.py`
 
-👉 Entry point of the project
+👉 Entry point of the system
 
-* This is the file you run
-* Takes user input from terminal
-* Sends query to the agent
-* Prints response
-
-👉 Think:
-
-> "Start the system and interact with it"
+* Takes user input
+* Calls `run_agent()`
+* Displays response
 
 ---
 
 ## 🔹 `data/`
 
-👉 Contains all raw data used in the project
-
 ### `tickets.json`
 
-* Mock ticket data
+* Stores ticket data
 * Used by ticket tool
 
 ### `runbooks/`
 
-* Internal documents (like company knowledge base)
-* Used for RAG (retrieval system)
-
-👉 Think:
-
-> "Knowledge + data the agent uses"
+* Internal documentation
+* Used for RAG retrieval
 
 ---
 
 ## 🔹 `rag/`
 
-👉 Handles Retrieval-Augmented Generation (RAG)
-
 ### `ingest.py`
 
-* Converts documents into embeddings
-* Stores them in vector database
+* Splits documents into chunks
+* Creates embeddings
+* Stores in vector DB
+
+👉 Uses:
+
+* chunk_size = 500
+* overlap = 100
+
+---
 
 ### `retriever.py`
 
-* Fetches relevant documents based on query
+👉 Implements **Hybrid Search**
 
-👉 Think:
+* Vector search (semantic)
+* Keyword search (exact match)
 
-> "Search system for internal knowledge"
+👉 Combines both results
 
 ---
 
 ## 🔹 `tools/`
 
-👉 These are functions the agent can use
-
 ### `ticket_tool.py`
 
-* Fetches ticket details
-* Used when query is about tickets
+👉 Handles ticket lifecycle
+
+* Fetch ticket details
+* Update status:
+
+  * resolve
+  * escalate
+
+---
 
 ### `rag_tool.py`
 
-* Uses retriever to get relevant documents
-* Helps answer technical issues
+👉 Handles knowledge retrieval with hallucination control
+
+* Retrieves documents
+* Forces LLM to answer only from context
+* If not found → returns `"NO_CONTEXT"`
+
+---
 
 ### `web_tool.py`
 
-* Simulates web search
-* Used when internal data is not enough
+👉 Fallback tool
 
-👉 Think:
-
-> "Capabilities of the agent"
+* Used when RAG fails
+* Simulates external search
 
 ---
 
 ## 🔹 `agent/`
 
-👉 Brain of the system
-
 ---
 
-### `agent.py`
+### `agent.py` (CORE ENGINE)
 
-* Main orchestrator
-* Connects everything together:
+👉 Orchestrates entire flow
 
-  * planner
-  * executor
-  * tools
+Steps:
 
-👉 Flow inside:
-User → Plan → Execute → Return result
+1. Get memory context
+2. Create full query
+3. Plan action (LLM)
+4. Execute tool
+5. Log everything
+6. Add confidence score
+7. Save to memory
 
 ---
 
 ### `planner.py`
 
-👉 Decides WHAT to do
+👉 LLM-based decision maker
 
-* Looks at user query
-* Chooses action:
+* Takes query + history
+* Chooses:
 
   * ticket_tool
   * rag_tool
   * web_tool
 
-👉 Currently:
-
-* Rule-based (if-else logic)
-
-👉 Future:
-
-* Replace with LLM-based reasoning
-
 ---
 
 ### `executor.py`
 
-👉 Executes the decision
+👉 Executes selected action
 
-* Takes action from planner
 * Calls correct tool
-* Returns result
-
-👉 Think:
-
-> "Planner decides, executor acts"
+* Applies fallback logic
+* Handles errors
 
 ---
 
 ### `prompt.py`
 
-* Contains system prompts (if using LLM)
-* Defines agent behavior
+* Stores system prompts
+* Controls LLM behavior
 
 ---
 
 ## 🔹 `memory/`
 
-👉 Stores conversation history
-
 ### `chat_memory.py`
 
-* Saves past interactions
-* Can be used for multi-turn conversations
+👉 Stores conversation history
 
-👉 Think:
+* Saves last interactions
+* Returns last 3 messages
 
-> "Short-term memory of the agent"
+👉 Used for:
+
+* context-aware responses
 
 ---
 
 ## 🔹 `evaluation/`
 
-👉 Used to test how well the system works
-
----
-
 ### `test_cases.json`
 
-* Sample queries + expected outputs
+* Contains test queries + expected output
 
 ---
 
 ### `metrics.py`
 
-* Runs test cases
-* Checks accuracy
-
-👉 Think:
-
-> "How good is my agent?"
+* Runs evaluation
+* Calculates accuracy
+* Prints failures
 
 ---
 
 ## 🔹 `utils/`
 
-👉 Helper functions
-
 ### `logger.py`
 
-* Prints logs
-* Shows:
+👉 Tracks system behavior
 
-  * user query
-  * chosen action
-  * result
+Logs:
 
-👉 Think:
-
-> "Debugging and visibility"
+* QUERY
+* ACTION
+* RESULT
 
 ---
 
-# 🧠 How Everything Connects
+## 🔹 `ui/`
+
+### `app.py`
+
+👉 Streamlit interface
+
+* Input field for query
+* Displays agent response
+
+---
+
+# 🧠 SYSTEM FLOW (FINAL)
 
 ```text
 User Input
    ↓
-app.py
+Memory Context Added
    ↓
-agent.py
+LLM Planner (Decision)
    ↓
-planner.py → decides action
+ReAct Reasoning
    ↓
-executor.py → calls tool
+Executor
    ↓
-tools/ → performs task
+Tool (RAG / Ticket / Web)
    ↓
-result returned
+Fallback (if needed)
    ↓
-printed to user
+Hallucination Control
+   ↓
+Confidence Scoring
+   ↓
+Logging (trace)
+   ↓
+Response Returned
 ```
 
 ---
 
-# 🔥 Current System Capabilities
+# 🔥 KEY DESIGN DECISIONS (INTERVIEW GOLD)
 
-* Basic agent decision making (rule-based)
-* RAG-based document retrieval
-* Tool-based architecture
-* Simple evaluation system
-* Logging for debugging
+## 1. Why LLM Planner?
+
+👉 More flexible than rules
+👉 Handles complex queries
+
+---
+
+## 2. Why Hybrid RAG?
+
+👉 Vector = semantic
+👉 Keyword = exact match
+👉 Combined = best accuracy
+
+---
+
+## 3. Why Fallback?
+
+👉 Real systems never fail silently
+
+---
+
+## 4. Why Memory?
+
+👉 Needed for real conversations
+
+---
+
+## 5. Why Logging?
+
+👉 Debugging + explainability
+
+---
+
+## 6. Why Evaluation?
+
+👉 Measure system performance
 
 ---
 
 # ⚠️ Current Limitations
 
-* Planner is rule-based (not intelligent yet)
-* No advanced memory usage
-* No real API/backend
-* Basic evaluation only
+* Planner can still make wrong decisions
+* Basic confidence scoring
+* No real production DB
+* Web tool is simulated
+* Limited dataset
 
 ---
 
 # 🚀 Future Improvements
 
-* Replace planner with LLM reasoning
-* Improve RAG (better chunking, embeddings)
-* Add UI (Streamlit)
-* Add better evaluation metrics
-* Add fallback and error handling
+* Function-calling agents
+* Better evaluation (precision, recall)
+* Real APIs (ticket system, search)
+* Distributed system (scaling)
+* Advanced memory (vector memory)
 
 ---
 
@@ -283,10 +394,10 @@ printed to user
 
 👉 This project is:
 
-> A modular AI agent system that can understand queries, decide actions, and use tools to solve problems.
+> A production-style AI agent system that uses LLM reasoning, RAG, tools, fallback strategies, and evaluation to intelligently resolve user tickets.
 
 ---
 
 # 🧠 One-line summary
 
-> “An AI agent that triages tickets using RAG, tools, and decision logic.”
+> “An intelligent multi-tool AI agent with memory, reasoning, and retrieval capabilities for automated ticket resolution.”

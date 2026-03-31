@@ -5,15 +5,25 @@ from tools.rag_tool import query_rag
 from tools.web_tool import web_search
 
 
-def execute(action: str, user_query: str):
-    if action == "ticket_tool":
-        return get_ticket_details(user_query)
+def execute(action: str, query: str):
+    try:
+        if action == "ticket_tool":
+            return get_ticket_details(query)
 
-    elif action == "rag_tool":
-        return query_rag(user_query)
+        elif action == "rag_tool":
+            result = query_rag(query)
 
-    elif action == "web_tool":
-        return web_search(user_query)
+            # 🔥 Fallback if no context
+            if result == "NO_CONTEXT":
+                return web_search(query)
 
-    else:
-        return "Sorry, I couldn't understand the request."
+            return result
+
+        elif action == "web_tool":
+            return web_search(query)
+
+        else:
+            return "Invalid action"
+
+    except Exception as e:
+        return f"Error occurred: {str(e)}"

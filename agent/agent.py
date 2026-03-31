@@ -2,19 +2,47 @@
 
 from agent.planner import plan_action
 from agent.executor import execute
-from utils.logger import log
+from memory.chat_memory import ChatMemory
+from utils.logger import log_step
+
+memory = ChatMemory()
 
 
-def run_agent(user_query: str):
-    log(f"User Query: {user_query}")
+def get_confidence(response: str):
+    if "NO_CONTEXT" in response:
+        return "Low"
+    elif len(response) < 50:
+        return "Medium"
+    else:
+        return "High"
 
-    plan = plan_action(user_query)
-    action = plan["action"]
 
-    log(f"Planned Action: {action}")
+def run_agent(query: str):
+    # 🔹 Step 1: Get memory context
+    history = memory.get_context()
 
-    result = execute(action, user_query)
+    full_query = f"""
+Previous conversation:
+{history}
 
-    log(f"Result: {result}")
+Current query:
+{query}
+"""
 
-    return result
+    log_step("QUERY", query)
+
+    # 🔹 Step 2: Plan action (LLM-based)
+    action = plan_action(full_query)
+    log_step("ACTION", action)
+
+    # 🔹 Step 3: Execute tool
+    result = execute(action, query)
+    log_step("RESULT", result)
+
+    # 🔹 Step 4: Confidence scoring
+    confidence = get_confidence(result)
+
+    # 🔹 Step 5: Save to memory
+    memory.add(query, result)
+
+    return f"{result}\n\nConfidence: {confidence}"

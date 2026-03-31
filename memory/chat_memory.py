@@ -9,3 +9,6 @@ class ChatMemory:
 
     def get_history(self):
         return self.history
+
+        #Saves past interactions
+        #Can be used for multi-turn conversations

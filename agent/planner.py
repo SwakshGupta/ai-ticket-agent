@@ -1,22 +1,29 @@
-# agent/planner.py
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
 
-from typing import Dict
+#instead of writing if else statement we have assigned a model which will select the tool automatically 
+#by checking from the prompt ( we have created a prompt tempelate)
 
-def plan_action(user_query: str) -> Dict:
-    """
-    Very simple rule-based planner (you can later replace with LLM)
-    """
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-    query = user_query.lower()
+prompt = PromptTemplate(
+    input_variables=["query"],
+    template="""
+You are an AI agent planner.
 
-    if "ticket" in query:
-        return {"action": "ticket_tool"}
+Decide which tool to use for the query.
 
-    elif "error" in query or "issue" in query:
-        return {"action": "rag_tool"}
+Available tools:
+- ticket_tool → for ticket related queries
+- rag_tool → for internal technical issues
+- web_tool → for general or unknown queries
 
-    elif "search" in query or "google" in query:
-        return {"action": "web_tool"}
+Return ONLY the tool name.
 
-    else:
-        return {"action": "fallback"}
+Query: {query}
+"""
+)
+
+def plan_action(query):
+    response = llm.predict(prompt.format(query=query))
+    return response.strip()

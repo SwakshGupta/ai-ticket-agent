@@ -9,35 +9,52 @@ The agent will ingest a new ticket, autonomously use external tools (mock APIs) 
 query an internal RAG pipeline (Vector DB) for known runbooks, and fall back to web search if needed. 
 Finally, it will synthesize this data into a structured root-cause assessment and draft a response for human approval.
 
-
-triage-agent/
+ai-ticket-agent/
 │
-├── app.py                  # Entry point (run agent)
-├── .env                    # API keys
+├── README.md
 ├── requirements.txt
+├── .env
+├── .gitignore
+│
+├── app/                    # Core application logic
+│   ├── main.py            # Entry point (API / CLI)
+│   ├── config.py          # Configs (API keys, settings)
+│   ├── agent/
+│   │   ├── agent.py       # Main agent logic
+│   │   ├── planner.py     # Decision making
+│   │   ├── executor.py    # Executes actions/tools
+│   │
+│   ├── rag/
+│   │   ├── retriever.py
+│   │   ├── embeddings.py
+│   │   ├── vector_store.py
+│   │
+│   ├── tools/
+│   │   ├── search_tool.py
+│   │   ├── db_tool.py
+│   │   ├── escalation_tool.py
+│   │
+│   ├── memory/
+│   │   ├── chat_memory.py
+│   │
+│   ├── utils/
+│   │   ├── logger.py
+│   │   ├── helpers.py
 │
 ├── data/
-│   ├── tickets.json        # Mock tickets
-│   └── runbooks/           # Internal docs (RAG)
-│       ├── db_issue.md
-│       ├── auth_issue.md
-│       ├── deployment.md
+│   ├── raw/               # PDFs, docs
+│   ├── processed/         # cleaned chunks
 │
-├── rag/
-│   ├── ingest.py           # Create vector DB
-│   └── retriever.py        # RAG tool
+├── evaluation/
+│   ├── metrics.py
+│   ├── test_cases.json
 │
-├── tools/
-│   ├── ticket_tool.py      # get_ticket_details
-│   ├── rag_tool.py         # wrapper around retriever
-│   └── web_tool.py         # web search
+├── notebooks/
+│   ├── experiments.ipynb
 │
-├── agent/
-│   ├── prompt.py           # system prompt
-│   └── agent.py            # agent creation
+├── tests/
+│   ├── test_agent.py
 │
-└── utils/
-    └── helpers.py          # optional utils
-
-
+└── scripts/
+    ├── ingest_data.py
     

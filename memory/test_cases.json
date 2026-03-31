@@ -1,0 +1,10 @@
+[
+  {
+    "query": "database connection error",
+    "expected": "check database"
+  },
+  {
+    "query": "get ticket 123",
+    "expected": "ticket details"
+  }
+]
